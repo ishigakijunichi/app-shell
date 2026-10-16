@@ -25,9 +25,11 @@ export { SidebarMenuItem, SidebarMenuButton } from "./components/sidebar";
 export {
   SidebarItem,
   SidebarGroup,
+  SidebarSection,
   SidebarSeparator,
   type SidebarItemProps,
   type SidebarGroupProps,
+  type SidebarSectionProps,
   type SidebarLayoutProps,
   type DefaultSidebarProps,
   type DefaultHeaderProps,
@@ -207,6 +209,12 @@ export type { PositionProps } from "./lib/position";
 export { Sheet } from "./components/sheet";
 export { Tabs } from "./components/tabs";
 export { Toolbar, type ToolbarProps } from "./components/toolbar";
+export {
+  FilterRail,
+  useFilterRailLayout,
+  type FilterRailRootProps,
+  type FilterRailSection,
+} from "./components/filter-rail";
 export { Tooltip } from "./components/tooltip";
 export { Select, type SelectAsyncFetcher } from "./components/select";
 export { Combobox, type ComboboxAsyncFetcher } from "./components/combobox";
@@ -301,11 +309,15 @@ export {
   type DataTableData,
   type DataTableFilterConfig,
   type HeaderRenderContext,
+  type DataTableAction,
   type RowAction,
+  type SelectionAction,
+  type SelectionActionHelpers,
   type UseDataTableOptions,
   type UseDataTableReturn,
   type MetadataFieldOptions,
   type DataTableContextValue,
+  type RowSelectionOptions,
 } from "./components/data-table";
 export { useCollectionVariables } from "./hooks/use-collection-variables";
 export { useURLCollectionVariables, withURLCollectionState } from "./lib/collection-url-state";

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CalendarDate, parseDate, isSameDay } from "@internationalized/date";
+import { CalendarDate, parseDate, parseZonedDateTime, isSameDay } from "@internationalized/date";
 import { renderRHFForm } from "../../../tests/rhf-test-utils";
 import { createAppShellWrapper } from "../../../tests/test-utils";
 import { Field } from "../field";
@@ -41,6 +41,7 @@ async function typeDate(user: ReturnType<typeof userEvent.setup>, field: Field, 
 const focusedLabel = () => document.activeElement?.getAttribute("aria-label") ?? "";
 
 const normalizeIds = (html: string) => html.replace(/id="base-ui-[^"]+"/g, 'id="base-ui-ID"');
+const gridCell = (labelPart: RegExp) => screen.getByRole("button", { name: labelPart });
 
 // ─── Snapshot ─────────────────────────────────────────────────────────────────
 
@@ -413,7 +414,6 @@ describe("DateRangePicker form validation", () => {
 
 describe("DateRangePicker popover", () => {
   const defaultRange = { start: d("2025-03-05"), end: d("2025-03-08") };
-  const gridCell = (labelPart: RegExp) => screen.getByRole("button", { name: labelPart });
 
   it("stays open after the first pick and closes when the range completes", async () => {
     const user = userEvent.setup();
@@ -491,5 +491,39 @@ describe("DateRangePicker popover", () => {
     const range = onChange.mock.calls[0][0];
     expect(isSameDay(range.start, d("2025-03-10"))).toBe(true);
     expect(isSameDay(range.end, d("2025-03-12"))).toBe(true);
+  });
+});
+
+describe("12-hour time display", () => {
+  it("shows PM ends as PM, not as 24-hour AM", () => {
+    const tz = "Asia/Tokyo";
+    render(
+      <DateRangePicker
+        aria-label="Shift"
+        granularity="minute"
+        hourCycle={12}
+        locale="en-US"
+        timeZone={tz}
+        defaultValue={{
+          start: parseZonedDateTime(`2026-10-12T13:00[${tz}]`),
+          end: parseZonedDateTime(`2026-10-12T18:30[${tz}]`),
+        }}
+      />,
+    );
+    const text = (field: Field, name: string) => seg(field, name).getAttribute("aria-valuetext");
+    expect(text("start date", "hour")).toBe("01");
+    expect(text("start date", "AM/PM")).toBe("PM");
+    expect(text("end date", "hour")).toBe("06");
+    expect(text("end date", "AM/PM")).toBe("PM");
+  });
+});
+
+describe("DateRangePicker showDayOfWeek", () => {
+  it("shows the day of the week for both ends", () => {
+    const range = { start: new CalendarDate(2025, 12, 19), end: new CalendarDate(2025, 12, 22) };
+    render(
+      <DateRangePicker aria-label="Period" locale="ja-JP" showDayOfWeek defaultValue={range} />,
+    );
+    expect(screen.getByRole("group").textContent).toBe("2025/12/19(金)–2025/12/22(月)");
   });
 });
